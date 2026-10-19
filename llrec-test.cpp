@@ -67,7 +67,12 @@ void dealloc(Node* head)
 //   function object struct declarations
 // -----------------------------------------------
 
-
+struct IsOdd
+{
+    bool operator()(int value) {
+        return (value % 2) == 1;
+    }
+};
 
 
 
@@ -97,6 +102,14 @@ int main(int argc, char* argv[])
 
     dealloc(smaller);
     dealloc(larger);
+
+    Node* list2 = readList(argv[1]);
+    cout << "Before filtering: ";
+    print(list2);
+    list2 = llfilter(list2, IsOdd());
+    cout << "After filtering: ";
+    print(list2);
+    dealloc(list2);
 
 
 
