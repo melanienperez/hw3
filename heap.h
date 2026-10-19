@@ -2,6 +2,8 @@
 #define HEAP_H
 #include <functional>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 template <typename T, typename PComparator = std::less<T> >
 class Heap
@@ -61,13 +63,79 @@ public:
 
 private:
   /// Add whatever helper functions and data members you need below
+  std::vector<T> data_;
+  int m_;
+  PComparator c_;
 
-
-
+  void trickleUp(size_t index);
 
 };
 
 // Add implementation of member functions here
+template <typename T, typename PComparator>
+Heap<T,PComparator>::Heap(int m, PComparator c): m_(m), c_(c) {
+} 
+
+template <typename T, typename PComparator>
+Heap<T,PComparator>::~Heap() {
+}
+
+template <typename T, typename PComparator>
+bool Heap<T,PComparator>::empty() const {
+  return data_.empty();
+} 
+
+template <typename T, typename PComparator>
+size_t Heap<T,PComparator>::size() const {
+  return data_.size();
+} 
+
+template <typename T, typename PComparator>
+void Heap<T,PComparator>::push(const T& item) {
+  data_.push_back(item);
+  trickleUp(data_.size() - 1);
+} 
+
+template <typename T, typename PComparator>
+void Heap<T,PComparator>::trickleUp(size_t index) {
+  if (index == 0) {
+    return;
+  }
+  size_t parentIndex = (index - 1) / m_;
+  if (c_(data_[index], data_[parentIndex])) {
+    std::swap(data_[index], data_[parentIndex]);
+    trickleUp(parentIndex);
+  }
+} 
+
+template <typename T, typename PComparator>
+void Heap<T,PComparator>::pop() {
+  if(empty()){
+    throw std::underflow_error("Heap is empty");
+  }
+  std::swap(data_[0], data_.back());
+  data_.pop_back();
+  size_t index = 0;
+  while (true) {
+    size_t bestChildIndex = index * m_ + 1;
+    if (bestChildIndex >= data_.size()) {
+      break;
+    }
+    for (size_t i = 1; i < m_; ++i) {
+      size_t childIndex = index * m_ + 1 + i;
+      if (childIndex < data_.size() && c_(data_[childIndex], data_[bestChildIndex])) {
+        bestChildIndex = childIndex;
+      }
+    }
+    if (c_(data_[bestChildIndex], data_[index])) {
+      std::swap(data_[index], data_[bestChildIndex]);
+      index = bestChildIndex;
+    } else {
+      break;
+    }
+  }
+}
+
 
 
 // We will start top() for you to handle the case of 
@@ -78,6 +146,7 @@ T const & Heap<T,PComparator>::top() const
   // Here we use exceptions to handle the case of trying
   // to access the top element of an empty heap
   if(empty()){
+    throw std::underflow_error("Heap is empty");
     // ================================
     // throw the appropriate exception
     // ================================
@@ -86,6 +155,7 @@ T const & Heap<T,PComparator>::top() const
   }
   // If we get here we know the heap has at least 1 item
   // Add code to return the top element
+  return data_[0];
 
 
 
@@ -94,20 +164,6 @@ T const & Heap<T,PComparator>::top() const
 
 // We will start pop() for you to handle the case of 
 // calling top on an empty heap
-template <typename T, typename PComparator>
-void Heap<T,PComparator>::pop()
-{
-  if(empty()){
-    // ================================
-    // throw the appropriate exception
-    // ================================
-
-
-  }
-
-
-
-}
 
 
 
